@@ -42,6 +42,7 @@ include(FeatureSummary)
 option(USE_MYSQL    "use mysql connector"       OFF)
 option(USE_PGSQL    "use postgresql connector"  OFF)
 option(USE_SQLITE   "use sqlite3 connector"     OFF)
+option(ENABLE_TESTS "build test code"           OFF)
 enable_testing()
 
 add_library(sqlpp17 INTERFACE)
@@ -55,8 +56,9 @@ target_include_directories(sqlpp17 INTERFACE
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/sqlpp17"
         DESTINATION include
 )
-
-add_subdirectory(tests)
+if(ENABLE_TESTS)
+  add_subdirectory(tests)
+endif()
 add_subdirectory(connectors)
 
 include(GNUInstallDirs)

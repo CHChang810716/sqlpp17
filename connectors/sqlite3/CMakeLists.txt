@@ -57,7 +57,9 @@ if (USE_SQLITE)
     list(APPEND inst_targets sqlpp17-connector-sqlite3)
     set(inst_targets ${inst_targets} PARENT_SCOPE)
 
-    add_subdirectory(tests)
+    if(ENABLE_TESTS)
+        add_subdirectory(tests)
+    endif()
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/sqlpp17"
             DESTINATION include

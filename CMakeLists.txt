@@ -22,11 +22,26 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+include(cmake/HunterGate.cmake)
+set(
+    HUNTER_CACHE_SERVERS
+    "https://github.com/CHChang810716/hunter-binary-cache"
+    CACHE
+    STRING
+    "Hunter cache servers"
+)
+HunterGate(
+    URL "https://github.com/CHChang810716/hunter.git"
+    SHA1 62eee92093b4cd36e80ca033689d4abb7e2def32
+)
 project(sqlpp17 VERSION 0.1 LANGUAGES CXX)
 
 include(FeatureSummary)
 
+option(USE_MYSQL    "use mysql connector"       OFF)
+option(USE_PGSQL    "use postgresql connector"  OFF)
+option(USE_SQLITE   "use sqlite3 connector"     OFF)
 enable_testing()
 
 add_library(sqlpp17 INTERFACE)

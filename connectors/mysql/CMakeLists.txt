@@ -31,11 +31,12 @@ if (APPLE)
  	find_package(Boost COMPONENTS thread system)
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-find_package(MySql)
-set_package_properties(MySql PROPERTIES URL "https://mariadb.org/" DESCRIPTION "MySql / MariaDb connector" TYPE OPTIONAL)
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+if(USE_MYSQL)
+    hunter_add_package(MySQL-client)
+    find_package(MySQL-client CONFIG REQUIRED)
+    set_package_properties(MySql PROPERTIES URL "https://mariadb.org/" DESCRIPTION "MySql / MariaDb connector" TYPE OPTIONAL)
 
-if (MYSQL_FOUND)
     add_library(sqlpp17-connector-mysql INTERFACE)
 
     target_include_directories(sqlpp17-connector-mysql INTERFACE
@@ -45,7 +46,7 @@ if (MYSQL_FOUND)
     )
 
     target_link_libraries(sqlpp17-connector-mysql INTERFACE sqlpp17)
-    target_link_libraries(sqlpp17-connector-mysql INTERFACE "${MYSQL_LIBRARIES}")
+    target_link_libraries(sqlpp17-connector-mysql INTERFACE MySQL::libmysql)
     if (APPLE)
 	    target_link_libraries(sqlpp17-connector-mysql INTERFACE "${Boost_THREAD_LIBRARY}")
     endif()

@@ -24,24 +24,26 @@
 
 find_package(Threads REQUIRED)
 
-find_package(PostgreSQL)
-set_package_properties(PostgreSQL PROPERTIES URL "https://www.postgresql.org/" DESCRIPTION "PostgresSQL support" TYPE OPTIONAL)
+if(USE_PGSQL)
+    hunter_add_package(PostgreSQL)
+    find_package(PostgreSQL REQUIRED)
+    set_package_properties(PostgreSQL PROPERTIES URL "https://www.postgresql.org/" DESCRIPTION "PostgresSQL support" TYPE OPTIONAL)
 
-if (POSTGRESQL_FOUND)
     add_library(sqlpp17-connector-postgresql INTERFACE)
 
-   target_include_directories(sqlpp17-connector-postgresql INTERFACE
+    target_include_directories(sqlpp17-connector-postgresql INTERFACE
         ${PostgreSQL_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     )
 
     target_link_libraries(sqlpp17-connector-postgresql INTERFACE sqlpp17)
-    target_link_libraries(sqlpp17-connector-postgresql INTERFACE "${PostgreSQL_LIBRARIES}")
+    target_link_libraries(sqlpp17-connector-postgresql INTERFACE PostgreSQL::libpq)
 
     add_subdirectory(tests)
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/sqlpp17"
             DESTINATION include
             FILES_MATCHING PATTERN "*.h")
+
 endif()

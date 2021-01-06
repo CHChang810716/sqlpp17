@@ -24,22 +24,25 @@
 
 find_package(Threads REQUIRED)
 
-option(SQLCIPHER "Build with SQLCipher" Off)
+# option(SQLCIPHER "Build with SQLCipher" Off)
+# 
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# if(SQLCIPHER)
+#   find_package(SQLCipher)
+#   set_package_properties(SQLCipher PROPERTIES URL "https://www.zetetic.net/sqlcipher/" DESCRIPTION "Full Database Encryption for SQLite" TYPE OPTIONAL)
+#   set (SQLITE3_LIBRARIES "${SQLCIPHER_LIBRARIES}" )
+#   set (SQLITE3_INCLUDE_DIRS "${SQLCIPHER_INCLUDE_DIRS}" )
+#   set (SQLITE3_LIBRARY "${SQLCIPHER_LIBRARY}")
+#   set (SQLITE3_FOUND ${SQLCipher_FOUND})
+# else()
+#   find_package(Sqlite3)
+#   set_package_properties(Sqlite3 PROPERTIES URL "https://www.postgresql.org/" DESCRIPTION "Sqlite3 support" TYPE OPTIONAL)
+# endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-if(SQLCIPHER)
-  find_package(SQLCipher)
-  set_package_properties(SQLCipher PROPERTIES URL "https://www.zetetic.net/sqlcipher/" DESCRIPTION "Full Database Encryption for SQLite" TYPE OPTIONAL)
-  set (SQLITE3_LIBRARIES "${SQLCIPHER_LIBRARIES}" )
-  set (SQLITE3_INCLUDE_DIRS "${SQLCIPHER_INCLUDE_DIRS}" )
-  set (SQLITE3_LIBRARY "${SQLCIPHER_LIBRARY}")
-  set (SQLITE3_FOUND ${SQLCipher_FOUND})
-else()
-  find_package(Sqlite3)
-  set_package_properties(Sqlite3 PROPERTIES URL "https://www.postgresql.org/" DESCRIPTION "Sqlite3 support" TYPE OPTIONAL)
-endif()
-
-if (SQLITE3_FOUND)
+if (USE_SQLITE)
+    hunter_add_package(sqlite3)
+    find_package(sqlite3 CONFIG REQUIRED)
+    set_package_properties(Sqlite3 PROPERTIES URL "https://www.sqlite.org/index.html" DESCRIPTION "Sqlite3 support" TYPE OPTIONAL)
     add_library(sqlpp17-connector-sqlite3 INTERFACE)
 
     target_include_directories(sqlpp17-connector-sqlite3 INTERFACE
@@ -49,7 +52,7 @@ if (SQLITE3_FOUND)
     )
 
     target_link_libraries(sqlpp17-connector-sqlite3 INTERFACE sqlpp17)
-    target_link_libraries(sqlpp17-connector-sqlite3 INTERFACE "${SQLITE3_LIBRARIES}")
+    target_link_libraries(sqlpp17-connector-sqlite3 INTERFACE sqlite3::sqlite3)
 
     add_subdirectory(tests)
 

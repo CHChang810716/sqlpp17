@@ -34,10 +34,12 @@ namespace sqlpp
   {
     static constexpr auto symbol = " != ";
   };
+  template<class A0, class A1> class column_t;
 
-  template <typename L, typename R>
-  constexpr auto operator!=(L l, R r)
+  template <class R, class... LArgs>
+  constexpr auto operator!=(const column_t<LArgs...> l, R r)
   {
+    using L = column_t<LArgs...>;
     if constexpr (constexpr auto _check = check_comparison_args<L, R>(); _check)
     {
       return comparison_t<L, not_equal_to_t, R>{l, r};
@@ -46,6 +48,10 @@ namespace sqlpp
     {
       return bad_expression_t{_check};
     }
+  }
+  template <class L, class... RArgs>
+  constexpr auto operator!=(L l, const column_t<RArgs...> r) {
+    return r != l;
   }
 
 }  // namespace sqlpp

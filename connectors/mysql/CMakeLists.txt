@@ -27,8 +27,9 @@ find_package(Threads REQUIRED)
 #FIXME: It might be better to actually _check if thread_local can be compiled and linked
 #       (one fine day, Apple will have thread_local, too, I assume)
 if (APPLE)
- 	message("Apple XCode does not have thread_local, thus we need to wrap that via boost thread")
- 	find_package(Boost COMPONENTS thread system)
+    message("Apple XCode does not have thread_local, thus we need to wrap that via boost thread")
+    hunter_add_package(Boost COMPONENTS thread system)
+ 	find_package(Boost COMPONENTS thread system CONFIG REQUIRED)
 endif()
 
 # set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -50,6 +51,9 @@ if(USE_MYSQL)
     if (APPLE)
 	    target_link_libraries(sqlpp17-connector-mysql INTERFACE "${Boost_THREAD_LIBRARY}")
     endif()
+
+    list(APPEND inst_targets sqlpp17-connector-mysql)
+    set(inst_targets ${inst_targets} PARENT_SCOPE)
 
     add_subdirectory(tests)
 

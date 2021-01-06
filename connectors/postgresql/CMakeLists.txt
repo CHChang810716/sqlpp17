@@ -40,6 +40,9 @@ if(USE_PGSQL)
     target_link_libraries(sqlpp17-connector-postgresql INTERFACE sqlpp17)
     target_link_libraries(sqlpp17-connector-postgresql INTERFACE PostgreSQL::libpq)
 
+    list(APPEND inst_targets sqlpp17-connector-postgresql)
+    set(inst_targets ${inst_targets} PARENT_SCOPE)
+
     add_subdirectory(tests)
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/sqlpp17"

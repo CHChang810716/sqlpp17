@@ -45,6 +45,7 @@ option(USE_SQLITE   "use sqlite3 connector"     OFF)
 enable_testing()
 
 add_library(sqlpp17 INTERFACE)
+set(inst_targets sqlpp17)
 
 target_include_directories(sqlpp17 INTERFACE
   $<BUILD_INTERFACE:${sqlpp17_SOURCE_DIR}/include>
@@ -57,5 +58,40 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/sqlpp17"
 
 add_subdirectory(tests)
 add_subdirectory(connectors)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+set(AKT_GEN_DIR             "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(AKT_CONFIG_INSTALL_DIR  "lib/cmake/${PROJECT_NAME}")
+set(AKT_CONFIG_VERSION      "${AKT_GEN_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+set(AKT_PROJECT_CONFIG      "${AKT_GEN_DIR}/${PROJECT_NAME}Config.cmake")
+set(AKT_TARGETS_EXPORT      "${PROJECT_NAME}Targets")
+set(AKT_NAMESPACE           "${PROJECT_NAME}::")
+configure_package_config_file(
+    cmake/Config.cmake.in
+    ${AKT_PROJECT_CONFIG}
+    INSTALL_DESTINATION ${AKT_CONFIG_INSTALL_DIR}
+)
+write_basic_package_version_file(
+    ${AKT_CONFIG_VERSION} COMPATIBILITY SameMajorVersion
+)
+install(
+    FILES ${AKT_PROJECT_CONFIG}
+    DESTINATION ${AKT_CONFIG_INSTALL_DIR}
+)
+install(
+    TARGETS ${inst_targets}
+    EXPORT ${AKT_TARGETS_EXPORT}
+    BUNDLE DESTINATION . COMPONENT Runtime
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Library
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Develop
+)
+install(
+    EXPORT ${AKT_TARGETS_EXPORT}
+    NAMESPACE ${AKT_NAMESPACE}
+    DESTINATION ${AKT_CONFIG_INSTALL_DIR}
+)
+
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

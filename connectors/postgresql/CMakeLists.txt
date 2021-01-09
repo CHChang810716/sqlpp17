@@ -25,6 +25,8 @@
 find_package(Threads REQUIRED)
 
 if(USE_PGSQL)
+    hunter_add_package(ZLIB)
+    find_package(ZLIB CONFIG REQUIRED)
     hunter_add_package(PostgreSQL)
     find_package(PostgreSQL REQUIRED)
     set_package_properties(PostgreSQL PROPERTIES URL "https://www.postgresql.org/" DESCRIPTION "PostgresSQL support" TYPE OPTIONAL)

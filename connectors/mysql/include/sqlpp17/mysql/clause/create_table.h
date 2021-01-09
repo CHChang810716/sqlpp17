@@ -36,6 +36,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sqlpp17/mysql/value_type_to_sql_string.h>
 
+#include <sqlpp17/utils.h>
+
 namespace sqlpp::mysql
 {
   struct context_t;
@@ -46,7 +48,9 @@ namespace sqlpp::mysql::detail
   template <typename ColumnSpec>
   [[nodiscard]] auto to_sql_column_spec_string(mysql::context_t& context, const ColumnSpec& columnSpec)
   {
-    auto ret = to_sql_name(context, columnSpec) + value_type_to_sql_string(context, type_t<typename ColumnSpec::value_type>{});
+    auto name = to_sql_name(context, columnSpec);
+    auto sql_value_type = value_type_to_sql_string(context, type_t<typename ColumnSpec::value_type>{});
+    auto ret = name + sql_value_type;
 
     if constexpr (!ColumnSpec::can_be_null)
     {
@@ -85,8 +89,14 @@ namespace sqlpp::mysql::detail
         }
       }
     } separator;
-
-    return (std ::string{} + ... + (separator.to_string() + to_sql_column_spec_string(context, ColumnSpecs{})));
+    const auto helper = [&](auto&& column_spec) {
+      auto sep = separator.to_string();
+      auto column_spec_str = to_sql_column_spec_string(
+        context, std::move(column_spec)
+      );
+      return sep + column_spec_str;
+    };
+    return vapply_allow_empty<std::string>(std::plus<void>{}, std::bind(helper, ColumnSpecs{})...);
   }
 
   template <typename TableSpec>

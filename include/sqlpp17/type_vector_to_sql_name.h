@@ -27,13 +27,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <sqlpp17/to_sql_name.h>
+#include <sqlpp17/utils.h>
 
 namespace sqlpp
 {
+  namespace type_vector_to_sql_name_detail {
+    template<class Context, class ColumnSpec>
+    struct TypeVectorToSQLNameHelper {
+      TypeVectorToSQLNameHelper(Context& context)
+      : context_(context)
+      {}
+      auto operator()() const {
+        return ", " + to_sql_name(context_, ColumnSpec{});
+      }
+      Context& context_;
+    };
+  }
   template <typename Context, typename FirstColumnSpec, typename... ColumnSpecs>
   [[nodiscard]] constexpr auto type_vector_to_sql_name(Context& context,
                                                   sqlpp::type_vector<FirstColumnSpec, ColumnSpecs...>)
   {
-    return (to_sql_name(context, FirstColumnSpec{}) + ... + (", " + to_sql_name(context, ColumnSpecs{})));
+    return vapply(
+      std::plus<void>{},
+      [&]() { return to_sql_name(context, FirstColumnSpec{}); },
+      type_vector_to_sql_name_detail::TypeVectorToSQLNameHelper<Context, ColumnSpecs>{context}...
+    );
   }
 }  // namespace sqlpp

@@ -66,6 +66,8 @@ namespace sqlpp
   template <typename Context, typename Expression, typename NameTag>
   [[nodiscard]] auto to_sql_string(Context& context, const alias_t<Expression, NameTag>& t)
   {
-    return to_sql_string(context, t._expression) + " AS " + to_sql_name(context, t);
+    auto expr_str = to_sql_string(context, t._expression);
+    auto name_str = to_sql_name(context, t);
+    return expr_str + " AS " + name_str;
   }
 }  // namespace sqlpp

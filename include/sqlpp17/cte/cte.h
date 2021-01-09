@@ -181,7 +181,9 @@ namespace sqlpp
   template <typename Context, typename CteType, typename TableSpec, typename Statement>
   [[nodiscard]] auto to_full_sql_string(Context& context, const cte_t<CteType, TableSpec, Statement>& t)
   {
-    return to_sql_name(context, t) + " AS (" + to_sql_string(context, t._statement) + ")";
+    auto sql_name = to_sql_name(context, t);
+    auto sql_stmt = to_sql_string(context, t._statement);
+    return sql_name + " AS (" + sql_stmt + ")";
   }
 
   template <typename Context, typename CteType, typename TableSpec, typename Statement>

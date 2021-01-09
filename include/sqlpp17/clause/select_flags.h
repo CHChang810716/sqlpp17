@@ -33,6 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp17/statement.h>
 #include <sqlpp17/type_traits.h>
 #include <sqlpp17/wrapped_static_assert.h>
+#include <sqlpp17/utils.h>
 
 namespace sqlpp
 {
@@ -66,11 +67,32 @@ namespace sqlpp
 
     std::tuple<Flags...> _flags;
   };
+  namespace select_flags_details {
+    template<class Context, class Flag, class T>
+    struct ToSQLStringHelper {
+      ToSQLStringHelper(Context& context, const T& t)
+      : context_(context)
+      , t_(t)
+      {}
+      auto operator()() const {
+        return to_sql_string(context_, std::get<Flag>(t_._flags));
+      }
+    private:
+      Context context_;
+      const T& t_;
+    };
+
+  }
 
   template <typename Context, typename... Flags, typename Statement>
   [[nodiscard]] auto to_sql_string(Context& context, const clause_base<select_flags_t<Flags...>, Statement>& t)
   {
-    return (std::string{} + ... + to_sql_string(context, std::get<Flags>(t._flags)));
+    return vapply_allow_empty<std::string>(
+      std::plus<void>{}, 
+      select_flags_details::ToSQLStringHelper<
+        Context, Flags, clause_base<select_flags_t<Flags...>, Statement>
+      >{context, t}...
+    );
   }
 
   SQLPP_WRAPPED_STATIC_ASSERT(assert_select_flags_args_are_valid, "select flags() args must be valid select_flags");

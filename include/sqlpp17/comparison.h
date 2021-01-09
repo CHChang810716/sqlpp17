@@ -74,6 +74,8 @@ namespace sqlpp
   template <typename Context, typename L, typename Operator, typename R>
   [[nodiscard]] auto to_sql_string(Context& context, const comparison_t<L, Operator, R>& t)
   {
-    return to_sql_string(context, embrace(t.l)) + Operator::symbol + to_sql_string(context, embrace(t.r));
+    auto l = to_sql_string(context, embrace(t.l));
+    auto r = to_sql_string(context, embrace(t.r));
+    return l + Operator::symbol + r;
   }
 }  // namespace sqlpp

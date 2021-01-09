@@ -69,7 +69,9 @@ namespace sqlpp
   template <typename Context, typename ValueType, typename Expression>
   [[nodiscard]] auto to_sql_string(Context& context, const sql_cast_t<ValueType, Expression>& t)
   {
-    return " CAST(" + to_sql_string(context, t._expression) + " AS " + value_type_to_sql_string(context, type_t<ValueType>{}) + ")";
+    auto from = to_sql_string(context, t._expression);
+    auto vt_sql = value_type_to_sql_string(context, type_t<ValueType>{});
+    return " CAST(" + from + " AS " + vt_sql + ")";
   }
 
 }  // namespace sqlpp

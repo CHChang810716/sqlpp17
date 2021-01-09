@@ -140,7 +140,9 @@ namespace sqlpp
   template <typename Context, typename TableSpec, typename ColumnSpec>
   [[nodiscard]] auto to_sql_string(Context& context, const column_t<TableSpec, ColumnSpec>& t)
   {
-    return to_sql_name(context, TableSpec{}) + "." + to_sql_name(context, ColumnSpec{});
+    auto l = to_sql_name(context, TableSpec{});
+    auto r = to_sql_name(context, ColumnSpec{});
+    return l + "." + r;
   }
 
 }  // namespace sqlpp

@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp17/postgresql/context.h>
 #include <sqlpp17/postgresql/value_type_to_sql_string.h>
 
+#include <sqlpp17/utils.h>
+
 namespace sqlpp::postgresql::detail
 {
   template <typename ColumnSpec>
@@ -101,8 +103,14 @@ namespace sqlpp::postgresql::detail
         }
       }
     } separator;
-
-    return (std ::string{} + ... + (separator.to_string() + to_sql_column_spec_string(context, ColumnSpecs{})));
+    const auto helper = [&](auto&& column_spec) {
+      auto sep = separator.to_string();
+      auto column_spec_str = to_sql_column_spec_string(
+        context, std::move(column_spec)
+      );
+      return sep + column_spec_str;
+    };
+    return vapply_allow_empty<std::string>(std::plus<void>{}, std::bind(helper, ColumnSpecs{})...);
   }
 
   template <typename TableSpec>

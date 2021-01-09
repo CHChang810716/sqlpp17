@@ -33,6 +33,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp17/type_traits.h>
 #include <sqlpp17/wrapped_static_assert.h>
 
+#include <sqlpp17/utils.h>
+
 namespace sqlpp
 {
   enum class with_mode
@@ -95,16 +97,39 @@ namespace sqlpp
         return std::string("RECURSIVE ");
     }
   }
-
+  namespace with_detail {
+    template<typename Context, with_mode Mode, typename CommonTableExpression, typename T>
+    struct ToSQLStringHelper {
+      ToSQLStringHelper(
+        Context& context, 
+        const T& t
+      )
+      : context_(context)
+      , t_(t)
+      , index_(-1) 
+      {}
+      auto operator()() {
+        return ((++index_ ? ", " : "") + to_full_sql_string(
+           context_, std::get<CommonTableExpression>(t_._ctes)));
+      }
+    private:
+      Context context_;
+      const T& t_;
+      int index_;
+    };
+  }
   template <typename Context, with_mode Mode, typename... CommonTableExpressions, typename Statement>
   [[nodiscard]] auto to_sql_string(Context& context,
                                    const clause_base<with_t<Mode, CommonTableExpressions...>, Statement>& t)
   {
     int index = -1;
     return std::string{"WITH "} + to_sql_string(context, Mode) +
-           (std::string() + ... +
-            ((++index ? ", " : "") + to_full_sql_string(context, std::get<CommonTableExpressions>(t._ctes)))) +
-           " ";
+      vapply_allow_empty<std::string>(std::plus<void>{}, 
+        with_detail::ToSQLStringHelper<
+          Context, Mode, CommonTableExpressions,
+          clause_base<with_t<Mode, CommonTableExpressions...>, Statement>
+        >{context, t}...
+      );
   }
 
   SQLPP_WRAPPED_STATIC_ASSERT(assert_with_args_are_ctes, "with() args must be CTEs");

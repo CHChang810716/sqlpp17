@@ -152,8 +152,9 @@ namespace sqlpp
   template <typename Context, typename When, typename Then>
   [[nodiscard]] auto to_sql_string(Context& context, const when_then_t<When, Then>& t)
   {
-    return std::string{" WHEN "} + to_sql_string(context, embrace(t._when)) + " THEN " +
-           to_sql_string(context, embrace(t._then));
+    auto when_expr = to_sql_string(context, embrace(t._when));
+    auto then_expr = to_sql_string(context, embrace(t._then));
+    return std::string{" WHEN "} + when_expr + " THEN " + then_expr;
   }
 
   template <typename Context, typename... WhenThens>
@@ -165,7 +166,9 @@ namespace sqlpp
   template <typename Context, typename CaseWhenThen, typename Else>
   [[nodiscard]] auto to_sql_string(Context& context, const case_when_then_else_t<CaseWhenThen, Else>& t)
   {
-    return to_sql_string(context, t._case_when_then) + " ELSE " + to_sql_string(context, embrace(t._else));
+    auto l = to_sql_string(context, t._case_when_then);
+    auto r = to_sql_string(context, embrace(t._else));
+    return l + " ELSE " + r;
   }
 
   SQLPP_WRAPPED_STATIC_ASSERT(assert_then_arg_is_expression, "then() arg must be a value expression");

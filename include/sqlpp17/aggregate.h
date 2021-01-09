@@ -61,8 +61,10 @@ namespace sqlpp
   template <typename Context, typename FunctionSpec, typename Expression>
   [[nodiscard]] auto to_sql_string(Context& context, const aggregate_t<FunctionSpec, Expression>& t)
   {
-    return std::string(FunctionSpec::name) + "(" + to_sql_string(context, typename FunctionSpec::flag_type{}) +
-           to_sql_string(context, t._expression) + ")";
+    auto flag_str = to_sql_string(context, typename FunctionSpec::flag_type{});
+    auto expr_str = to_sql_string(context, t._expression);
+    
+    return std::string(FunctionSpec::name) + "(" + flag_str + expr_str + ")";
   }
 
 }  // namespace sqlpp

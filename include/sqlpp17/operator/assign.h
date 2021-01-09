@@ -93,6 +93,8 @@ namespace sqlpp
   template <typename Context, typename L, typename R>
   [[nodiscard]] auto to_sql_string(Context& context, const assign_t<L, R>& t)
   {
-    return to_sql_string(context, t.column) + " = " + to_sql_string(context, embrace(t.value));
+    auto column_str = to_sql_string(context, t.column);
+    auto value_str = to_sql_string(context, embrace(t.value));
+    return column_str + " = " + value_str;
   }
 }  // namespace sqlpp

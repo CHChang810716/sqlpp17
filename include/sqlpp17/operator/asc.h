@@ -77,7 +77,9 @@ namespace sqlpp
   template <typename Context, typename L>
   [[nodiscard]] auto to_sql_string(Context& context, const sort_order_t<L>& t)
   {
-    return to_sql_string(context, embrace(t.l)) + to_sql_string(context, t.order);
+    auto l = to_sql_string(context, embrace(t.l));
+    auto order = to_sql_string(context, t.order); 
+    return l + order;
   }
 
 }  // namespace sqlpp

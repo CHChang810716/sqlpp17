@@ -64,13 +64,14 @@ namespace sqlpp
   template <typename Context, typename L, typename... Args>
   [[nodiscard]] auto to_sql_string(Context& context, const not_in_t<L, Args...>& t)
   {
+    auto l = to_sql_string(context, embrace(t.l));
     if constexpr (sizeof...(Args) == 1)
     {
-      return to_sql_string(context, embrace(t.l)) + " IN(" + to_sql_string(context, std::get<0>(t.args)) + ")";
+      return l + " IN(" + to_sql_string(context, std::get<0>(t.args)) + ")";
     }
     else
     {
-      return to_sql_string(context, embrace(t.l)) + " IN(" + tuple_to_sql_string(context, ", ", t.args) + ")";
+      return l + " IN(" + tuple_to_sql_string(context, ", ", t.args) + ")";
     }
   }
 }  // namespace sqlpp

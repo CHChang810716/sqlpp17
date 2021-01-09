@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp17/succeeded.h>
 #include <sqlpp17/type_traits.h>
 #include <sqlpp17/wrapped_static_assert.h>
+#include <sqlpp17/utils.h>
 
 namespace sqlpp
 {
@@ -195,12 +196,31 @@ namespace sqlpp
     else
       return succeeded{};
   }
+  namespace statement_detail
+  {
+    template<class Context, class Clause, class Stmt>
+    struct ToSQLStringHelper {
+      ToSQLStringHelper(Context& context, const Stmt& t)
+      : context_(context)
+      , t_(t)
+      {}
+      auto operator()() const {
+        return to_sql_string(context_, static_cast<const clause_base<Clause, Stmt>&>(t_));
+      }
+    private:
+      Context& context_;
+      const Stmt& t_;
+    };
+  } // namespace statement_detail
+  
 
   template <typename Context, typename... Clauses>
   [[nodiscard]] auto to_sql_string(Context& context, const statement<Clauses...>& t)
   {
-    return (std::string{} + ... +
-            to_sql_string(context, static_cast<const clause_base<Clauses, statement<Clauses...>>&>(t)));
+    return vapply_allow_empty<std::string>(
+      std::plus<std::string>{},
+      statement_detail::ToSQLStringHelper<Context, Clauses, statement<Clauses...>>(context, t)...
+    );
   }
 
   template <typename... LClauses, typename... RClauses>

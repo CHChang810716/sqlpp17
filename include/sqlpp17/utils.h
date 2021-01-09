@@ -6,7 +6,7 @@ namespace sqlpp
   inline auto vapply(const Op& optr, ArgF0&& argf0, ArgF&&... argfs) {
     auto x0 = argf0();
     if constexpr(sizeof...(ArgF) == 0) {
-      return argf0();
+      return x0;
     } else {
       return optr(x0, vapply(
         optr, std::forward<ArgF>(argfs)...
